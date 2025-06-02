@@ -22,7 +22,7 @@ for i, col in enumerate(df.columns, 1):
 plt.suptitle("Box Plots of Numerical Features", fontsize=16)
 plt.tight_layout()
 plt.show()
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 code2--------------->
 import pandas as pd
 import seaborn as sns
@@ -45,6 +45,7 @@ plt.show()
 sns.pairplot(data, diag_kind='kde', plot_kws={'alpha': 0.5})
 plt.suptitle('Pair Plot of California Housing Features', y=1.02)
 plt.show()
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 code3------------------>
@@ -88,6 +89,7 @@ plt.ylabel('Principal Component 2')
 plt.legend()
 plt.grid()
 plt.show()
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 code4------------------->
@@ -114,6 +116,224 @@ def find_s_algorithm(file_path):
                     hypothesis[i] = '?'
 
     return hypothesis
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#exp5
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+
+data = np.random.rand(100)
+
+labels = ["Class1" if x <= 0.5 else "Class2" for x in data[:50]]
+
+
+def euclidean_distance(x1, x2):
+    return abs(x1 - x2)
+
+
+def knn_classifier(train_data, train_labels, test_point, k):
+    distances = [(euclidean_distance(test_point, train_data[i]), train_labels[i]) for i in range(len(train_data))]
+
+    distances.sort(key=lambda x: x[0])
+    k_nearest_neighbors = distances[:k]
+
+    k_nearest_labels = [label for _, label in k_nearest_neighbors]
+
+    return Counter(k_nearest_labels).most_common(1)[0][0]
+
+
+train_data = data[:50]
+train_labels = labels
+
+test_data = data[50:]
+
+k_values = [1, 2, 3, 4, 5, 20, 30]
+
+print("--- k-Nearest Neighbors Classification ---")
+print("Training dataset: First 50 points labeled based on the rule (x <= 0.5 -> Class1, x > 0.5 -> Class2)")
+print("Testing dataset: Remaining 50 points to be classified\n")
+
+results = {}
+
+for k in k_values:
+    print(f"Results for k = {k}:")
+    classified_labels = [knn_classifier(train_data, train_labels, test_point, k) for test_point in test_data]
+    results[k] = classified_labels
+
+    for i, label in enumerate(classified_labels, start=51):
+        print(f"Point x{i} (value: {test_data[i - 51]:.4f}) is classified as {label}")
+    print("\n")
+
+print("Classification complete.\n")
+
+for k in k_values:
+    classified_labels = results[k]
+    class1_points = [test_data[i] for i in range(len(test_data)) if classified_labels[i] == "Class1"]
+    class2_points = [test_data[i] for i in range(len(test_data)) if classified_labels[i] == "Class2"]
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(train_data, [0] * len(train_data), c=["blue" if label == "Class1" else "red" for label in train_labels],
+                label="Training Data", marker="o")
+    plt.scatter(class1_points, [1] * len(class1_points), c="blue", label="Class1 (Test)", marker="x")
+    plt.scatter(class2_points, [1] * len(class2_points), c="red", label="Class2 (Test)", marker="x")
+
+    plt.title(f"k-NN Classification Results for k = {k}")
+    plt.xlabel("Data Points")
+    plt.ylabel("Classification Level")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#exp6
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Gaussian kernel for weights
+def kernel(x, xi, tau):
+    return np.exp(-np.sum((x - xi)**2) / (2 * tau**2))
+
+# LWR prediction for a single point
+def predict(x, X, y, tau):
+    W = np.diag([kernel(x, xi, tau) for xi in X])
+    theta = np.linalg.pinv(X.T @ W @ X) @ X.T @ W @ y
+    return x @ theta
+
+# Data preparation
+np.random.seed(42)
+X = np.linspace(0, 2*np.pi, 100)
+y = np.sin(X) + 0.1*np.random.randn(100)
+X_bias = np.c_[np.ones(X.shape), X]
+
+# Prediction on test points
+x_test = np.linspace(0, 2*np.pi, 200)
+x_test_bias = np.c_[np.ones(x_test.shape), x_test]
+tau = 0.5
+y_pred = np.array([predict(xi, X_bias, y, tau) for xi in x_test_bias])
+
+# Plot
+plt.figure(figsize=(10, 6))
+plt.scatter(X, y, c='red', label='Data')
+plt.plot(x_test, y_pred, c='blue', label=f'LWR (tau={tau})')
+plt.legend(); plt.title('Locally Weighted Regression')
+plt.xlabel('X'); plt.ylabel('y'); plt.grid(True); plt.show()
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#exp7
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+def linear_regression_california():
+    housing = fetch_california_housing(as_frame=True)
+    X = housing.data[["AveRooms"]] 
+    y = housing.target 
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+    plt.scatter(X_test, y_test, color="blue", label="Actual")
+    plt.plot(X_test, y_pred, color="red", label="Predicted")
+    plt.xlabel("Average number of rooms (AveRooms)")
+    plt.ylabel("Median value of homes ($100,000)")
+    plt.title("Linear Regression - California Housing Dataset")
+    plt.legend()
+    plt.show()
+
+    print("Linear Regression - California Housing Dataset")
+    print("Mean Squared Error:", mean_squared_error(y_test, y_pred))
+    print("R^2 Score:", r2_score(y_test, y_pred))
+
+
+def polynomial_regression_auto_mpg():
+    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data"
+    column_names = ["mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model_year", "origin"]
+    data = pd.read_csv(url, sep='\s+', names=column_names, na_values="?")
+    data = data.dropna()
+
+    X = data["displacement"].values.reshape(-1, 1) 
+    y = data["mpg"].values
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    poly_model = make_pipeline(PolynomialFeatures(degree=2), StandardScaler(), LinearRegression())
+    poly_model.fit(X_train, y_train)
+
+    y_pred = poly_model.predict(X_test)
+
+    plt.scatter(X_test, y_test, color="blue", label="Actual")
+    plt.scatter(X_test, y_pred, color="red", label="Predicted")
+    plt.xlabel("Displacement")
+    plt.ylabel("Miles per gallon (mpg)")
+    plt.title("Polynomial Regression - Auto MPG Dataset")
+    plt.legend()
+    plt.show()
+
+    print("Polynomial Regression - Auto MPG Dataset")
+    print("Mean Squared Error:", mean_squared_error(y_test, y_pred))
+    print("R^2 Score:", r2_score(y_test, y_pred))
+
+
+if __name__ == "__main__":
+    print("Demonstrating Linear Regression and Polynomial Regression\n")
+    linear_regression_california()
+    polynomial_regression_auto_mpg()
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#exp8
+# Importing necessary libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn import tree
+import seaborn as sns
+
+data = load_breast_cancer()
+X = data.data
+y = data.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+clf = DecisionTreeClassifier(random_state=42)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+# Print model performance metrics
+print("Model Performance Metrics:")
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=['Malignant', 'Benign']))
+
+# Create confusion matrix visualization
+plt.figure(figsize=(10, 8))
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title('Confusion Matrix')
+plt.ylabel('True Label')
+plt.xlabel('Predicted Label')
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy * 100:.2f}%")
+new_sample = np.array([X_test[0]])
+prediction = clf.predict(new_sample)
+
+prediction_class = "Benign" if prediction == 1 else "Malignant"
+print(f"Predicted Class for the new sample: {prediction_class}")
+
+plt.figure(figsize=(12,8))
+tree.plot_tree(clf, filled=True, feature_names=data.feature_names, class_names=data.target_names)
+plt.title("Decision Tree - Breast Cancer Dataset")
+plt.show()
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 code8-------------------------->
 #exp8
@@ -162,40 +382,7 @@ tree.plot_tree(clf, filled=True, feature_names=data.feature_names, class_names=d
 plt.title("Decision Tree - Breast Cancer Dataset")
 plt.show()
 
-code6---------------------------------------------->
-
-#exp6
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Gaussian kernel for weights
-def kernel(x, xi, tau):
-    return np.exp(-np.sum((x - xi)**2) / (2 * tau**2))
-
-# LWR prediction for a single point
-def predict(x, X, y, tau):
-    W = np.diag([kernel(x, xi, tau) for xi in X])
-    theta = np.linalg.pinv(X.T @ W @ X) @ X.T @ W @ y
-    return x @ theta
-
-# Data preparation
-np.random.seed(42)
-X = np.linspace(0, 2*np.pi, 100)
-y = np.sin(X) + 0.1*np.random.randn(100)
-X_bias = np.c_[np.ones(X.shape), X]
-
-# Prediction on test points
-x_test = np.linspace(0, 2*np.pi, 200)
-x_test_bias = np.c_[np.ones(x_test.shape), x_test]
-tau = 0.5
-y_pred = np.array([predict(xi, X_bias, y, tau) for xi in x_test_bias])
-
-# Plot
-plt.figure(figsize=(10, 6))
-plt.scatter(X, y, c='red', label='Data')
-plt.plot(x_test, y_pred, c='blue', label=f'LWR (tau={tau})')
-plt.legend(); plt.title('Locally Weighted Regression')
-plt.xlabel('X'); plt.ylabel('y'); plt.grid(True); plt.show()
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 code9------------------------------------------------------------------------------>
 #exp9
@@ -241,3 +428,50 @@ plt.show()
 file_path = 'training_data.csv'
 hypothesis = find_s_algorithm(file_path)
 print("\nThe final hypothesis is:", hypothesis)
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#exp10
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.datasets import load_breast_cancer
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.metrics import confusion_matrix, classification_report
+
+# 1. डेटा लोड व स्केलिंग
+data = load_breast_cancer()
+X = data.data
+y = data.target
+
+# 2. KMeans क्लस्टरिंग
+kmeans = KMeans(n_clusters=2, random_state=42)
+clusters = kmeans.fit_predict(X_scaled)
+
+# 3. मूल्यांकन
+print("Confusion Matrix:\n", confusion_matrix(y, clusters))
+print("\nClassification Report:\n", classification_report(y, clusters))
+
+# 4. PCA वापरून 2D प्रोजेक्शन
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+centroids = pca.transform(kmeans.cluster_centers_)
+
+# 5. DataFrame तयार करा
+df = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
+df['Cluster'] = clusters
+df['Label'] = y
+
+# 6. क्लस्टर प्लॉट
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PC1', y='PC2', hue='Cluster', palette='Set1', s=80, edgecolor='k')
+plt.scatter(*centroids.T, c='red', s=200, marker='X', label='Centroids')
+plt.title('KMeans Clustering'); plt.legend(); plt.show()
+
+# 7. मूळ लेबल प्लॉट
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PC1', y='PC2', hue='Label', palette='coolwarm', s=80, edgecolor='k')
+plt.title('True Labels'); plt.legend(); plt.show()
+
