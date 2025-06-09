@@ -69,4 +69,89 @@ gradle run
 
 * Expected Output:
 
-Hello World!
+Hello World
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Exp2===>
+
+1)maven
+2)geerate maven project
+1.sudo apt udate/upgrade
+2.sudo apt install openjdk-11-jdk
+
+3.sodu apt install maven -y
+
+3)  create project
+
+mvn archetype:generate -DgroupId=com.example -DartifactId=MyMavneApp78 -DarchetyprArtifactId=mavne-archetype-quic
+kstart -DinteractiveMode=false
+
+4) cd MyMavenApp78
+
+5)tree
+.
+├── pom.xml
+└── src
+    ├── main
+    │   └── java
+    │       └── com
+    │           └── example
+    │               └── App.java
+    └── test
+        └── java
+            └── com
+                └── example
+                    └── AppTest.java
+
+6)nano pom.xml
+
+properties
+      maven.compiler.source/target-11
+
+7)
+mvn clean package
+
+java -cp target/MyMavenApp78 -1.0-SNAPSHOT.jar com.example.App
+
+
+-------------------------------------------------------------------------------------------
+Exp3=================>
+1)gradle
+
+2) setting up
+s1-gradle -v
+s2-create new gradle
+1.new dir
+2.mkdir HelloGradle
+3.cd HelloGradle
+3.run gradle with init
+4.gradle init --type java-application
+
+
+s3-explore struction
+── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+└── src
+    ├── main
+    │   └── java
+    │       └── App.java
+    └── test
+        └── java
+            └── AppTest.java
+3)understandig gradle build scripts
+a.groovy
+B.kotlin DSL
+
+4) gradle hello/  ./gradlew run
+
+--------------------------------------------------------------------------------------------
+
+
+
+
+
